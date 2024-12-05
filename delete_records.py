@@ -56,8 +56,15 @@ def eliminar_registro_con_relaciones(db_path, id_principal, mapeo):
         if 'conn' in locals():
             conn.close()
 
-def ejecutar_eliminacion():
+def seleccionar_base_de_datos():
     db_path = filedialog.askopenfilename(filetypes=[("GPKG files", "*.gpkg")])
+    if not db_path:
+        messagebox.showwarning("Advertencia", "Debes seleccionar una base de datos.")
+        return
+    db_path_label.config(text=db_path)
+
+def ejecutar_eliminacion():
+    db_path = db_path_label.cget("text")
     if not db_path:
         messagebox.showwarning("Advertencia", "Debes seleccionar una base de datos.")
         return
@@ -65,6 +72,10 @@ def ejecutar_eliminacion():
     id_principal = id_entry.get()
     if not id_principal.isdigit():
         messagebox.showwarning("Advertencia", "Debes ingresar un ID válido.")
+        return
+
+    confirmacion = messagebox.askyesno("Confirmación", f"¿Estás seguro de que deseas eliminar el registro con ID {id_principal}?")
+    if not confirmacion:
         return
 
     mapeo = {
@@ -92,16 +103,23 @@ def ejecutar_eliminacion():
 
 # Configuración de la interfaz gráfica
 root = tk.Tk()
-root.title("Eliminación de Registros SQLite")
+root.title("Eliminación de Registros Geopackage")
 
 frame = tk.Frame(root, padx=10, pady=10)
 frame.pack()
 
-tk.Label(frame, text="ID del registro a eliminar:").grid(row=0, column=0, pady=5)
-id_entry = tk.Entry(frame, width=30)
-id_entry.grid(row=0, column=1, pady=5)
+# Botón para seleccionar base de datos
+tk.Button(frame, text="Seleccionar Geopackage", command=seleccionar_base_de_datos).grid(row=0, column=0, columnspan=2, pady=5)
+db_path_label = tk.Label(frame, text="", fg="blue")
+db_path_label.grid(row=1, column=0, columnspan=2, pady=5)
 
-eliminar_button = tk.Button(frame, text="Seleccionar Base de Datos y Eliminar", command=ejecutar_eliminacion)
-eliminar_button.grid(row=1, column=0, columnspan=2, pady=10)
+# Campo para ingresar el ID
+tk.Label(frame, text="T_ID del predio a eliminar:").grid(row=2, column=0, pady=5)
+id_entry = tk.Entry(frame, width=30)
+id_entry.grid(row=2, column=1, pady=5)
+
+# Botón para ejecutar la eliminación
+eliminar_button = tk.Button(frame, text="Aceptar", command=ejecutar_eliminacion)
+eliminar_button.grid(row=3, column=0, columnspan=2, pady=10)
 
 root.mainloop()
